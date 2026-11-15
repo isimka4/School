@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Русский язык — Интерактивные игры и тренажёры</title>
+  <script src="topics.js"></script>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100dvh;
+    }
+    header {
+      background: #fff; border-bottom: 1px solid var(--border); padding: 14px 20px;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header-inner {
+      max-width: 1020px; margin: 0 auto; display: flex; flex-wrap: wrap;
+      justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .logo { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .container { max-width: 1020px; margin: 20px auto; padding: 0 16px 48px; }
+
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; align-items: center; }
+    .chip {
+      padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border);
+      background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--muted);
+    }
+    .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .search-input {
+      flex: 1; min-width: 210px; padding: 9px 14px; border-radius: 999px;
+      border: 1px solid var(--border); font-size: 14px; background: #fff;
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(295px, 1fr)); gap: 16px; }
+    .topic-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+      padding: 18px; display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03); transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .topic-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07); }
+    .tags { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .tag {
+      font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 8px;
+      background: var(--primary-light); color: var(--primary);
+    }
+    .tag-game { background: #fef3c7; color: #92400e; }
+    .tag-fresh { background: #dcfce7; color: #166534; }
+    .topic-card h3 { margin: 0 0 8px; font-size: 16px; line-height: 1.35; }
+    .topic-card p { margin: 0 0 16px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+    .btn {
+      padding: 10px 15px; border: none; border-radius: 12px; font-weight: 600;
+      font-size: 14px; cursor: pointer; background: var(--primary); color: #fff;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.92; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-outline { background: #e2e8f0; color: var(--text); }
+    .btn-refresh { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .btn-success { background: var(--success); }
+
+    .arena {
+      background: #fff; border: 1px solid var(--border); border-radius: 22px;
+      padding: 24px; box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+    }
+    .arena-top {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+    }
+    .stats-pill {
+      background: #f8fafc; border: 1px solid var(--border); padding: 6px 14px;
+      border-radius: 12px; font-weight: 700; font-size: 14px;
+    }
+
+    /* Игра 1: Сортировщик */
+    .word-stage {
+      background: linear-gradient(135deg, #eff6ff, #f8fafc);
+      border: 2px dashed #93c5fd; border-radius: 18px;
+      padding: 26px 16px; text-align: center; margin-bottom: 18px;
+    }
+    .current-word { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.45; }
+    .buckets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    .bucket-btn {
+      padding: 15px 12px; border-radius: 14px; border: 2px solid var(--border);
+      background: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: all 0.15s; color: var(--text);
+    }
+    .bucket-btn:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
+
+    /* Игра 2: Корректор */
+    .text-board {
+      font-size: 19px; line-height: 1.95; background: #f8fafc;
+      padding: 20px; border-radius: 16px; border: 1px solid var(--border);
+    }
+    .token {
+      display: inline-block; padding: 2px 6px; margin: 2px 1px; border-radius: 8px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .token:hover { background: #e2e8f0; }
+    .token.found { background: #dcfce7; color: #166534; font-weight: 700; text-decoration: underline; }
+    .token.wrong-click { background: #fee2e2; color: #991b1b; }
+
+    /* Игра 3 и 4: Морфемный и Синтаксический конструктор */
+    .role-palette { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .role-btn {
+      padding: 9px 14px; border-radius: 10px; border: 2px solid var(--border);
+      background: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+    }
+    .role-btn.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .morpheme-word {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;
+      background: #f8fafc; padding: 24px 16px; border-radius: 18px;
+      border: 1px solid var(--border); margin-bottom: 16px;
+    }
+    .morph-part {
+      padding: 12px 14px; background: #fff; border: 2px solid var(--border);
+      border-radius: 14px; cursor: pointer; text-align: center; min-width: 78px;
+      transition: border-color 0.15s;
+    }
+    .morph-part:hover { border-color: var(--primary); }
+    .morph-part .m-text { font-size: 20px; font-weight: 800; display: block; }
+    .morph-part .m-role { font-size: 12px; color: var(--primary); font-weight: 700; margin-top: 6px; display: block; }
+
+    /* Игра 5: Пунктуационный разбор */
+    .punct-sentence {
+      font-size: 20px; line-height: 2.2; background: #f8fafc;
+      padding: 22px 18px; border-radius: 18px; border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .punct-word {
+      display: inline-block; padding: 4px 10px; margin: 3px 2px; border-radius: 10px;
+      background: #fff; border: 2px solid var(--border); cursor: pointer;
+      font-weight: 600; transition: all 0.15s; user-select: none;
+    }
+    .punct-word:hover { border-color: var(--primary); }
+    .punct-word.has-comma {
+      border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 800;
+    }
+    .punct-word.comma-ok {
+      border-color: var(--success); background: #dcfce7; color: #166534;
+    }
+    .punct-word.comma-err {
+      border-color: var(--danger); background: #fee2e2; color: #991b1b;
+    }
+
+    .feedback-box {
+      margin-top: 16px; padding: 14px 16px; border-radius: 14px;
+      font-size: 14px; font-weight: 600; display: none; line-height: 1.45;
+    }
+    .fb-ok { background: #dcfce7; color: #166534; display: block; }
+    .fb-err { background: #fee2e2; color: #991b1b; display: block; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo" onclick="showCatalog()">📚 Русский язык — Игротека</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="showCatalog()">Все темы</button>
+        <button class="btn btn-outline" onclick="openApiKeyModal()">🔑 Ключ ИИ</button>
+        <button class="btn" onclick="openTeacherModal()">+ Новая тема</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- КАТАЛОГ ТЕМ -->
+    <div id="catalogView">
+      <div class="filters">
+        <div id="gradeFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <input id="searchBox" class="search-input" type="text" placeholder="Поиск по теме, корню или правилу..." oninput="renderCatalog()" />
+      </div>
+      <div id="topicsGrid" class="grid"></div>
+    </div>
+
+    <!-- ИГРОВАЯ АРЕНА -->
+    <div id="gameView" class="hidden">
+      <div class="arena">
+        <div class="arena-top">
+          <button class="btn btn-outline" onclick="showCatalog()">← К темам</button>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-refresh" id="refreshTopicBtn" onclick="refreshCurrentTopicWithAI()">🔄 Обновить задания (новые примеры)</button>
+            <div class="stats-pill" id="scorePill">Очки: 0</div>
+          </div>
+        </div>
+        <h2 id="gameTitle" style="margin:0 0 6px;font-size:20px;"></h2>
+        <p id="gameDesc" style="color:var(--muted);margin:0 0 16px;font-size:14px;"></p>
+        <div id="aiRefreshStatus" style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:10px;"></div>
+        <div id="gameStage"></div>
+        <div id="feedbackBox" class="feedback-box"></div>
+      </div>
+    </div>
+
+    <!-- НАСТРОЙКА API-КЛЮЧА -->
+    <div id="keyView" class="hidden">
+      <div class="arena">
+        <h2 style="margin-top:0;">🔑 Подключение автообновления заданий (Gemini API)</h2>
+        <p style="color:var(--muted);">Один раз сохраните ваш ключ Google AI Studio — после этого внутри <strong>любой</strong> игры кнопка <strong>«🔄 Обновить задания»</strong> будет за 4 секунды генерировать совершенно новый набор слов и предложений по этой теме.</p>
+        <input id="savedGemKey" type="password" placeholder="Gemini API Key (AIzaSy...)" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);margin-bottom:12px;" />
+        <div style="display:flex;gap:10px;">
+          <button class="btn" onclick="saveGemKey()">Сохранить ключ</button>
+          <button class="btn btn-outline" onclick="showCatalog()">Назад</button>
+        </div>
+        <div id="keySaveStatus" style="margin-top:10px;font-size:14px;font-weight:600;color:var(--success);"></div>
+      </div>
+    </div>
+
+    <!-- ГЕНЕРАТОР НОВОЙ ТЕМЫ ДЛЯ УЧИТЕЛЯ -->
+    <div id="teacherView" class="hidden">
+      <div class="arena">
+        <h2 style="margin-top:0;">✨ Создать новую игру по своей теме</h2>
+        <p style="color:var(--muted);">Введите класс и тему урока — ИИ соберёт новую игру и сохранит её в памяти вашего браузера.</p>
+        <input id="tGrade" type="text" placeholder="Класс (например: 9 класс)" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);margin-bottom:10px;" />
+        <input id="tTitle" type="text" placeholder="Тема игры (например: Бессоюзные сложные предложения)" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);margin-bottom:10px;" />
+        <button class="btn" id="tGenBtn" onclick="generateNewTopic()">Сгенерировать и открыть игру</button>
+        <div id="tStatus" style="margin-top:10px;font-size:14px;font-weight:600;color:var(--primary);"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_OVERRIDES_KEY = "rus_portal_dynamic_topics_v2";
+    let allTopics = [];
+    let selectedGrade = "Все";
+    let currentTopicId = null;
+
+    const GAME_NAMES = {
+      sorter: "🎯 Сортировщик",
+      corrector: "🔍 Корректор текста",
+      morpheme: "🧩 Морфемный конструктор",
+      syntax: "📐 Синтаксический разбор",
+      punctuation: "✍️ Пунктуационный разбор"
+    };
+
+    function loadTopicsWithOverrides() {
+      const base = [...(window.RUS_TOPICS || [])];
+      let savedMap = {};
+      try {
+        savedMap = JSON.parse(localStorage.getItem(STORAGE_OVERRIDES_KEY) || "{}");
+      } catch {}
+
+      const merged = base.map((t) => (savedMap[t.id] ? { ...t, ...savedMap[t.id], _updated: true } : t));
+      Object.values(savedMap).forEach((custom) => {
+        if (!merged.some((m) => m.id === custom.id)) {
+          merged.unshift({ ...custom, _updated: true });
+        }
+      });
+      allTopics = merged;
+    }
+
+    function saveTopicOverride(topicObj) {
+      let savedMap = {};
+      try {
+        savedMap = JSON.parse(localStorage.getItem(STORAGE_OVERRIDES_KEY) || "{}");
+      } catch {}
+      savedMap[topicObj.id] = topicObj;
+      localStorage.setItem(STORAGE_OVERRIDES_KEY, JSON.stringify(savedMap));
+      loadTopicsWithOverrides();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadTopicsWithOverrides();
+      document.getElementById("savedGemKey").value = localStorage.getItem("blitz_gem_key") || "";
+      renderGradeFilters();
+      renderCatalog();
+    });
+
+    function renderGradeFilters() {
+      const grades = ["Все", ...new Set(allTopics.map((t) => t.grade))];
+      document.getElementById("gradeFilters").innerHTML = grades
+        .map(
+          (g) =>
+            `<button class="chip ${g === selectedGrade ? "active" : ""}" onclick="selectGrade('${g}')">${g}</button>`
+        )
+        .join("");
+    }
+
+    function selectGrade(g) {
+      selectedGrade = g;
+      renderGradeFilters();
+      renderCatalog();
+    }
+
+    function renderCatalog() {
+      const q = document.getElementById("searchBox").value.toLowerCase().trim();
+      const filtered = allTopics.filter((t) => {
+        const matchGrade = selectedGrade === "Все" || t.grade === selectedGrade;
+        const matchText =
+          !q ||
+          t.title.toLowerCase().includes(q) ||
+          t.section.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q);
+        return matchGrade && matchText;
+      });
+
+      document.getElementById("topicsGrid").innerHTML = filtered
+        .map(
+          (t) => `
+          <div class="topic-card">
+            <div>
+              <div class="tags">
+                <span class="tag">${t.grade}</span>
+                <span class="tag">${t.section}</span>
+                <span class="tag tag-game">${GAME_NAMES[t.gameType] || "Игра"}</span>
+                ${t._updated ? `<span class="tag tag-fresh">Обновлено</span>` : ""}
+              </div>
+              <h3>${t.title}</h3>
+              <p>${t.description}</p>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn" style="flex:1;" onclick="launchTopic('${t.id}')">Играть →</button>
+              <button class="btn btn-refresh" title="Сгенерировать свежие задания по этой теме" onclick="launchAndRefresh('${t.id}')">🔄</button>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    function hideAllViews() {
+      document.getElementById("catalogView").classList.add("hidden");
+      document.getElementById("gameView").classList.add("hidden");
+      document.getElementById("teacherView").classList.add("hidden");
+      document.getElementById("keyView").classList.add("hidden");
+    }
+
+    function showCatalog() {
+      hideAllViews();
+      document.getElementById("catalogView").classList.remove("hidden");
+      renderGradeFilters();
+      renderCatalog();
+    }
+
+    function openApiKeyModal() {
+      hideAllViews();
+      document.getElementById("keyView").classList.remove("hidden");
+      document.getElementById("keySaveStatus").textContent = "";
+    }
+
+    function saveGemKey() {
+      const val = document.getElementById("savedGemKey").value.trim();
+      localStorage.setItem("blitz_gem_key", val);
+      document.getElementById("keySaveStatus").textContent = "✅ Ключ сохранён! Теперь можно обновлять любые игры в один клик.";
+    }
+
+    function openTeacherModal() {
+      hideAllViews();
+      document.getElementById("teacherView").classList.remove("hidden");
+    }
+
+    function setFeedback(text, isOk) {
+      const box = document.getElementById("feedbackBox");
+      box.className = "feedback-box " + (isOk ? "fb-ok" : "fb-err");
+      box.textContent = text;
+    }
+
+    function clearFeedback() {
+      const box = document.getElementById("feedbackBox");
+      box.className = "feedback-box";
+      box.textContent = "";
+    }
+
+    function launchTopic(id) {
+      const topic = allTopics.find((t) => t.id === id);
+      if (!topic) return;
+      currentTopicId = id;
+
+      hideAllViews();
+      document.getElementById("gameView").classList.remove("hidden");
+
+      document.getElementById("gameTitle").textContent = topic.title;
+      document.getElementById("gameDesc").textContent = topic.description;
+      document.getElementById("aiRefreshStatus").textContent = "";
+      clearFeedback();
+
+      if (topic.gameType === "sorter") startSorterGame(topic);
+      else if (topic.gameType === "corrector") startCorrectorGame(topic);
+      else if (topic.gameType === "morpheme") startMorphemeGame(topic);
+      else if (topic.gameType === "syntax") startSyntaxGame(topic);
+      else if (topic.gameType === "punctuation") startPunctuationGame(topic);
+    }
+
+    function launchAndRefresh(id) {
+      launchTopic(id);
+      refreshCurrentTopicWithAI();
+    }
+
+    async function callGeminiJSON(prompt, statusEl) {
+      const gemKey = (localStorage.getItem("blitz_gem_key") || "").trim();
+      if (!gemKey) {
+        openApiKeyModal();
+        throw new Error("Сначала вставьте Gemini API Key.");
+      }
+
+      const fetchT = async (url, opts, ms = 12000) => {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), ms);
+        try {
+          return await fetch(url, { ...opts, signal: ctrl.signal });
+        } finally {
+          clearTimeout(t);
+        }
+      };
+
+      let models = ["gemini-3.8-flash"];
+      try {
+        const listResp = await fetchT(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(gemKey)}`, {}, 6000);
+        const listJson = await listResp.json();
+        if (listResp.ok && Array.isArray(listJson.models)) {
+          const filtered = listJson.models
+            .filter(
+              (m) =>
+                Array.isArray(m.supportedGenerationMethods) &&
+                m.supportedGenerationMethods.includes("generateContent") &&
+                /gemini/i.test(m.name) &&
+                !/embedding|imagen|veo|tts|audio|robotics|thinking|deep-research|learnlm|gemma/i.test(m.name)
+            )
+            .map((m) => m.name.replace(/^models\//, ""));
+          filtered.sort((a, b) => (/flash/i.test(a) ? 0 : 1) - (/flash/i.test(b) ? 0 : 1));
+          if (filtered.length > 0) models = filtered;
+        }
+      } catch {}
+
+      let lastErr = "Не удалось получить ответ от ИИ";
+      for (const model of models.slice(0, 4)) {
+        if (statusEl) statusEl.textContent = `⚡ Генерирую свежие задания (${model})...`;
+        try {
+          const resp = await fetchT(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(gemKey)}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.55 }
+              })
+            },
+            12000
+          );
+          const json = await resp.json();
+          if (resp.ok) {
+            let raw = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            raw = raw.replace(/```json|```/g, "").trim();
+            return JSON.parse(raw);
+          }
+          lastErr = json.error?.message || `HTTP ${resp.status}`;
+        } catch (e) {
+          lastErr = e.name === "AbortError" ? `Модель ${model} не ответила за 12 сек...` : e.message;
+        }
+      }
+      throw new Error(lastErr);
+    }
+
+    async function refreshCurrentTopicWithAI() {
+      const topic = allTopics.find((t) => t.id === currentTopicId);
+      if (!topic) return;
+
+      const btn = document.getElementById("refreshTopicBtn");
+      const status = document.getElementById("aiRefreshStatus");
+      btn.disabled = true;
+
+      let schemaInstruction = "";
+      if (topic.gameType === "sorter") {
+        schemaInstruction = `Верни ТОЛЬКО валидный JSON-объект вида:
+{"items": [{"text": "новый пример", "bucket": 0, "hint": "объяснение правила"}]}
+Индексы колонок bucket строго от 0 до ${topic.buckets.length - 1}, где колонки: ${JSON.stringify(topic.buckets)}.`;
+      } else if (topic.gameType === "morpheme") {
+        schemaInstruction = `Верни ТОЛЬКО валидный JSON-объект вида:
+{"words": [{"parts": ["прист", "корень", "суфф", "оконч"], "roles": ["приставка", "корень", "суффикс", "окончание"], "hint": "пояснение"}]}
+Допустимые роли только: "приставка", "корень", "суффикс", "окончание".`;
+      } else if (topic.gameType === "corrector") {
+        schemaInstruction = `Верни ТОЛЬКО валидный JSON-объект вида:
+{"tokens": [{"word": "слово", "error": false}, {"word": "ашибка", "error": true, "fix": "ошибка", "hint": "правило"}]}`;
+      } else if (topic.gameType === "syntax") {
+        schemaInstruction = `Верни ТОЛЬКО валидный JSON-объект вида:
+{"sentences": [{"words": ["слово1", "слово2"], "roles": ["подлежащее", "сказуемое"], "hint": "пояснение"}]}
+Допустимые роли только: "подлежащее", "сказуемое", "определение", "дополнение", "обстоятельство", "союз/частица". Длина массива words и roles должна совпадать.`;
+      } else if (topic.gameType === "punctuation") {
+        schemaInstruction = `Верни ТОЛЬКО валидный JSON-объект вида:
+{"sentences": [{"words": ["слово1", "слово2", "слово3"], "commaAfter": [0], "hint": "пояснение знаков препинания"}]}
+Массив words не должен содержать запятых; commaAfter — массив индексов (начиная с 0) тех слов, ПОСЛЕ которых ставится запятая.`;
+      }
+
+      const prompt = `Ты опытный учитель русского языка. Сгенерируй НОВЫЙ, не повторяющий стандартные примеры набор заданий для интерактивной игры по теме "${topic.title}" (${topic.grade}).
+Описание задачи: ${topic.aiPromptHint || topic.description}
+${schemaInstruction}`;
+
+      try {
+        const generated = await callGeminiJSON(prompt, status);
+        const updatedTopic = { ...topic, ...generated, _updated: true };
+        saveTopicOverride(updatedTopic);
+        launchTopic(topic.id);
+        document.getElementById("aiRefreshStatus").textContent = "✅ Задания обновлены! Сгенерирован новый вариант.";
+      } catch (e) {
+        status.textContent = "❌ " + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // --- ИГРА 1: СОРТИРОВЩИК ---
+    function startSorterGame(topic) {
+      const items = [...topic.items].sort(() => Math.random() - 0.5);
+      let idx = 0;
+      let score = 0;
+      let streak = 0;
+
+      const render = () => {
+        document.getElementById("scorePill").textContent = `Очки: ${score} | Вопрос ${Math.min(idx + 1, items.length)}/${items.length}`;
+        if (idx >= items.length) {
+          document.getElementById("gameStage").innerHTML = `
+            <div style="text-align:center;padding:20px;">
+              <h2>🎉 Тренажёр пройден!</h2>
+              <p style="font-size:18px;">Итоговый счёт: <strong>${score}</strong></p>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn" onclick="launchTopic('${topic.id}')">Пройти ещё раз</button>
+                <button class="btn btn-refresh" onclick="refreshCurrentTopicWithAI()">🔄 Сгенерировать новые задания</button>
+              </div>
+            </div>`;
+          return;
+        }
+        const cur = items[idx];
+        document.getElementById("gameStage").innerHTML = `
+          <div class="word-stage">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Выбери правильную категорию:</div>
+            <div class="current-word">${cur.text}</div>
+          </div>
+          <div class="buckets-grid">
+            ${topic.buckets
+              .map((b, bIdx) => `<button class="bucket-btn" onclick="window._pickBucket(${bIdx})">${b}</button>`)
+              .join("")}
+          </div>
+        `;
+      };
+
+      window._pickBucket = (chosen) => {
+        const cur = items[idx];
+        if (chosen === cur.bucket) {
+          streak++;
+          score += 10 + Math.min(streak * 2, 10);
+          setFeedback(`✅ Верно! ${cur.hint || ""}`, true);
+          idx++;
+          render();
+        } else {
+          streak = 0;
+          score = Math.max(0, score - 5);
+          setFeedback(`❌ Ошибка! Правильно: «${topic.buckets[cur.bucket]}». ${cur.hint || ""}`, false);
+          document.getElementById("scorePill").textContent = `Очки: ${score} | Вопрос ${idx + 1}/${items.length}`;
+        }
+      };
+
+      render();
+    }
+
+    // --- ИГРА 2: КОРРЕКТОР ТЕКСТА ---
+    function startCorrectorGame(topic) {
+      const totalErrors = topic.tokens.filter((t) => t.error).length;
+      let found = 0;
+      let score = 0;
+      const foundSet = new Set();
+
+      const updatePill = () => {
+        document.getElementById("scorePill").textContent = `Найдено ошибок: ${found} из ${totalErrors} | Очки: ${score}`;
+      };
+      updatePill();
+
+      document.getElementById("gameStage").innerHTML = `
+        <div class="text-board">
+          ${topic.tokens
+            .map(
+              (t, i) =>
+                `<span class="token" id="tok_${i}" onclick="window._clickToken(${i})">${t.word}</span>`
+            )
+            .join(" ")}
+        </div>
+      `;
+
+      window._clickToken = (i) => {
+        const tok = topic.tokens[i];
+        const el = document.getElementById(`tok_${i}`);
+        if (foundSet.has(i)) return;
+
+        if (tok.error) {
+          foundSet.add(i);
+          found++;
+          score += 20;
+          el.classList.add("found");
+          el.textContent = tok.fix;
+          setFeedback(`✅ Отлично! Исправлено на «${tok.fix}». ${tok.hint}`, true);
+          updatePill();
+          if (found === totalErrors) {
+            setFeedback(`🏆 Все ${totalErrors} ошибок найдены! Нажмите «🔄 Обновить задания», чтобы получить новый текст.`, true);
+          }
+        } else {
+          score = Math.max(0, score - 5);
+          el.classList.add("wrong-click");
+          setTimeout(() => el.classList.remove("wrong-click"), 600);
+          setFeedback(`❌ В слове «${tok.word}» ошибки нет — ищи дальше!`, false);
+          updatePill();
+        }
+      };
+    }
+
+    // --- ИГРА 3: МОРФЕМНЫЙ КОНСТРУКТОР ---
+    function startMorphemeGame(topic) {
+      let wIdx = 0;
+      let selectedRole = "корень";
+      const rolesList = ["приставка", "корень", "суффикс", "окончание"];
+
+      const renderWord = () => {
+        if (wIdx >= topic.words.length) {
+          document.getElementById("gameStage").innerHTML = `
+            <div style="text-align:center;padding:20px;">
+              <h2>🎉 Все слова разобраны по составу!</h2>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn" onclick="launchTopic('${topic.id}')">Пройти заново</button>
+                <button class="btn btn-refresh" onclick="refreshCurrentTopicWithAI()">🔄 Новые слова для разбора</button>
+              </div>
+            </div>`;
+          return;
+        }
+        const wordObj = topic.words[wIdx];
+        const userRoles = new Array(wordObj.parts.length).fill("");
+        document.getElementById("scorePill").textContent = `Слово ${wIdx + 1} из ${topic.words.length}`;
+
+        const draw = () => {
+          document.getElementById("gameStage").innerHTML = `
+            <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">1. Выбери часть слова:</div>
+            <div class="role-palette">
+              ${rolesList
+                .map(
+                  (r) =>
+                    `<button class="role-btn ${r === selectedRole ? "selected" : ""}" onclick="window._selMorph('${r}')">${r}</button>`
+                )
+                .join("")}
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">2. Нажми на морфемы слова:</div>
+            <div class="morpheme-word">
+              ${wordObj.parts
+                .map(
+                  (p, i) => `
+                  <div class="morph-part" onclick="window._assignMorph(${i})">
+                    <span class="m-text">${p}</span>
+                    <span class="m-role">${userRoles[i] || "—"}</span>
+                  </div>`
+                )
+                .join("")}
+            </div>
+            <button class="btn btn-success" onclick="window._checkMorph()">Проверить разбор</button>
+          `;
+        };
+
+        window._selMorph = (r) => {
+          selectedRole = r;
+          draw();
+        };
+        window._assignMorph = (i) => {
+          userRoles[i] = selectedRole;
+          draw();
+        };
+        window._checkMorph = () => {
+          let mistakes = 0;
+          wordObj.roles.forEach((rightRole, i) => {
+            if (userRoles[i] !== rightRole) mistakes++;
+          });
+          if (mistakes === 0) {
+            setFeedback(`✅ Безупречный морфемный разбор! ${wordObj.hint}`, true);
+            wIdx++;
+            setTimeout(() => {
+              clearFeedback();
+              renderWord();
+            }, 1500);
+          } else {
+            setFeedback(`❌ Есть неточности (ошибок: ${mistakes}). Подбери однокоренные слова и измени форму слова!`, false);
+          }
+        };
+
+        draw();
+      };
+
+      renderWord();
+    }
+
+    // --- ИГРА 4: СИНТАКСИЧЕСКИЙ РАЗБОР ---
+    function startSyntaxGame(topic) {
+      let sIdx = 0;
+      let selectedRole = "подлежащее";
+      const rolesList = ["подлежащее", "сказуемое", "определение", "дополнение", "обстоятельство", "союз/частица"];
+
+      const renderSent = () => {
+        if (sIdx >= topic.sentences.length) {
+          document.getElementById("gameStage").innerHTML = `
+            <div style="text-align:center;padding:20px;">
+              <h2>🎉 Все предложения разобраны!</h2>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn" onclick="launchTopic('${topic.id}')">Пройти заново</button>
+                <button class="btn btn-refresh" onclick="refreshCurrentTopicWithAI()">🔄 Новые предложения для разбора</button>
+              </div>
+            </div>`;
+          return;
+        }
+        const sent = topic.sentences[sIdx];
+        const userRoles = new Array(sent.words.length).fill("");
+        document.getElementById("scorePill").textContent = `Предложение ${sIdx + 1} из ${topic.sentences.length}`;
+
+        const draw = () => {
+          document.getElementById("gameStage").innerHTML = `
+            <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">1. Выбери член предложения на панели:</div>
+            <div class="role-palette">
+              ${rolesList
+                .map(
+                  (r) =>
+                    `<button class="role-btn ${r === selectedRole ? "selected" : ""}" onclick="window._selSyn('${r}')">${r}</button>`
+                )
+                .join("")}
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">2. Нажми на слова в предложении:</div>
+            <div class="morpheme-word">
+              ${sent.words
+                .map(
+                  (w, i) => `
+                  <div class="morph-part" onclick="window._assignSyn(${i})">
+                    <span class="m-text">${w}</span>
+                    <span class="m-role">${userRoles[i] || "—"}</span>
+                  </div>`
+                )
+                .join("")}
+            </div>
+            <button class="btn btn-success" onclick="window._checkSyn()">Проверить синтаксический разбор</button>
+          `;
+        };
+
+        window._selSyn = (r) => {
+          selectedRole = r;
+          draw();
+        };
+        window._assignSyn = (i) => {
+          userRoles[i] = selectedRole;
+          draw();
+        };
+        window._checkSyn = () => {
+          let mistakes = 0;
+          sent.roles.forEach((rightRole, i) => {
+            if (userRoles[i] !== rightRole) mistakes++;
+          });
+          if (mistakes === 0) {
+            setFeedback(`✅ Отличный синтаксический разбор! ${sent.hint || ""}`, true);
+            sIdx++;
+            setTimeout(() => {
+              clearFeedback();
+              renderSent();
+            }, 1600);
+          } else {
+            setFeedback(`❌ Есть неточности (неверно разобрано слов: ${mistakes}). Найди сначала грамматические основы!`, false);
+          }
+        };
+
+        draw();
+      };
+
+      renderSent();
+    }
+
+    // --- ИГРА 5: ПУНКТУАЦИОННЫЙ РАЗБОР ---
+    function startPunctuationGame(topic) {
+      let sIdx = 0;
+
+      const renderSent = () => {
+        if (sIdx >= topic.sentences.length) {
+          document.getElementById("gameStage").innerHTML = `
+            <div style="text-align:center;padding:20px;">
+              <h2>🎉 Все знаки препинания расставлены верно!</h2>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn" onclick="launchTopic('${topic.id}')">Пройти заново</button>
+                <button class="btn btn-refresh" onclick="refreshCurrentTopicWithAI()">🔄 Новые предложения для пунктуации</button>
+              </div>
+            </div>`;
+          return;
+        }
+        const sent = topic.sentences[sIdx];
+        const chosenCommas = new Set();
+        let checkedState = null;
+        document.getElementById("scorePill").textContent = `Предложение ${sIdx + 1} из ${topic.sentences.length}`;
+
+        const draw = () => {
+          document.getElementById("gameStage").innerHTML = `
+            <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Нажми на слово, <strong>после которого</strong> нужна запятая (повторное нажатие убирает запятую):</div>
+            <div class="punct-sentence">
+              ${sent.words
+                .map((w, i) => {
+                  const active = chosenCommas.has(i);
+                  let cls = "punct-word";
+                  if (checkedState) {
+                    const shouldHave = sent.commaAfter.includes(i);
+                    if (active && shouldHave) cls += " comma-ok";
+                    else if (active !== shouldHave) cls += " comma-err";
+                  } else if (active) {
+                    cls += " has-comma";
+                  }
+                  return `<span class="${cls}" onclick="window._toggleComma(${i})">${w}${active ? "," : ""}</span>`;
+                })
+                .join(" ")}
+            </div>
+            <button class="btn btn-success" onclick="window._checkPunct()">Проверить запятые</button>
+          `;
+        };
+
+        window._toggleComma = (i) => {
+          if (i === sent.words.length - 1) return; // После последнего слова точка уже стоит
+          checkedState = null;
+          if (chosenCommas.has(i)) chosenCommas.delete(i);
+          else chosenCommas.add(i);
+          draw();
+        };
+
+        window._checkPunct = () => {
+          checkedState = true;
+          draw();
+          const rightSet = new Set(sent.commaAfter);
+          const isExact =
+            chosenCommas.size === rightSet.size &&
+            [...chosenCommas].every((idx) => rightSet.has(idx));
+
+          if (isExact) {
+            setFeedback(`✅ Безупречный пунктуационный разбор! ${sent.hint || ""}`, true);
+            sIdx++;
+            setTimeout(() => {
+              clearFeedback();
+              renderSent();
+            }, 1800);
+          } else {
+            setFeedback(`❌ Знаки расставлены неточно (ошибки подсвечены красным). Определи границы грамматических основ!`, false);
+          }
+        };
+
+        draw();
+      };
+
+      renderSent();
+    }
+
+    // --- СОЗДАНИЕ СОВЕРШЕННО НОВОЙ ТЕМЫ ---
+    async function generateNewTopic() {
+      const grade = document.getElementById("tGrade").value.trim() || "9 класс";
+      const title = document.getElementById("tTitle").value.trim();
+      const status = document.getElementById("tStatus");
+
+      if (!title) {
+        status.textContent = "⚠️ Введите тему игры.";
+        return;
+      }
+
+      const btn = document.getElementById("tGenBtn");
+      btn.disabled = true;
+
+      const prompt = `Создай интерактивную игру-сортировщик по русскому языку для школьников (${grade}) по теме "${title}".
+Верни ТОЛЬКО валидный JSON-объект без markdown:
+{
+  "id": "custom-${Date.now()}",
+  "grade": "${grade}",
+  "section": "Практикум",
+  "title": "${title}",
+  "description": "Распредели слова или примеры по правильным колонкам.",
+  "gameType": "sorter",
+  "aiPromptHint": "12 новых примеров по теме ${title} для ${grade}",
+  "buckets": ["Колонка 1", "Колонка 2"],
+  "items": [
+    {"text": "пример 1", "bucket": 0, "hint": "короткое объяснение правила"},
+    {"text": "пример 2", "bucket": 1, "hint": "короткое объяснение правила"}
+  ]
+}
+Сделай 12 примеров с ловушками.`;
+
+      try {
+        const newTopic = await callGeminiJSON(prompt, status);
+        saveTopicOverride(newTopic);
+        launchTopic(newTopic.id);
+      } catch (e) {
+        status.textContent = "❌ " + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
