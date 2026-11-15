@@ -3,163 +3,523 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Русский язык — Интерактивные игры и тренажёры</title>
+  <title>Русский язык — Игротека и тренажёры</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="topics.js"></script>
   <style>
     :root {
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --primary: #2563eb;
-      --primary-light: #eff6ff;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --border: #e2e8f0;
+      --blue-bg: #0f4ea3;
+      --blue-dark: #0a387a;
+      --blue-light: #1a63c4;
+      --white: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --red-accent: #e63926;
+      --yellow-accent: #facc15;
+      --green-accent: #16a34a;
+      --card-bg: #ffffff;
+      --border-soft: rgba(255, 255, 255, 0.25);
     }
+
     * { box-sizing: border-box; }
+
     body {
-      margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg); color: var(--text); min-height: 100dvh;
+      margin: 0;
+      font-family: "Montserrat", -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--blue-bg);
+      /* Лёгкая зернистость / текстура холста как на референсе */
+      background-image:
+        radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 0),
+        radial-gradient(rgba(10, 40, 95, 0.35) 1px, transparent 0);
+      background-size: 22px 22px;
+      background-position: 0 0, 11px 11px;
+      color: var(--white);
+      min-height: 100dvh;
     }
+
+    /* ВЕРХНЯЯ ПАНЕЛЬ */
     header {
-      background: #fff; border-bottom: 1px solid var(--border); padding: 14px 20px;
-      position: sticky; top: 0; z-index: 10;
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(15, 78, 163, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
     }
     .header-inner {
-      max-width: 1020px; margin: 0 auto; display: flex; flex-wrap: wrap;
-      justify-content: space-between; align-items: center; gap: 12px;
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
     }
-    .logo { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; }
-    .container { max-width: 1020px; margin: 20px auto; padding: 0 16px 48px; }
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255, 255, 255, 0.65);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-badge:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--white);
+    }
 
-    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; align-items: center; }
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 18px 16px 64px;
+    }
+
+    /* HERO-БЛОК В СТИЛЕ ПОСТЕРА */
+    .hero-poster {
+      position: relative;
+      padding: 26px 16px 34px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero-title-wrap {
+      position: relative;
+      display: inline-block;
+      margin: 0 auto 8px;
+    }
+    .hero-main-title {
+      font-size: clamp(38px, 7.5vw, 76px);
+      font-weight: 900;
+      line-height: 0.96;
+      letter-spacing: -1.5px;
+      text-transform: uppercase;
+      color: var(--white);
+      margin: 0;
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 4px 20px rgba(8, 35, 80, 0.35);
+    }
+    /* Красный рукописный росчерк поверх заголовка как на референсе */
+    .hero-scribble {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 52%;
+      transform: translateY(-50%);
+      width: 84%;
+      height: 54px;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .hero-subtitle {
+      font-size: clamp(18px, 3.2vw, 30px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 6px 0 12px;
+      color: var(--white);
+    }
+    .hero-desc {
+      max-width: 650px;
+      margin: 0 auto 24px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+    }
+
+    /* Плавающие капсулы-теги (наклонные пилюли с белой обводкой) */
+    .floating-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px 18px;
+      max-width: 780px;
+      margin: 0 auto 24px;
+    }
+    .float-pill {
+      padding: 9px 20px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255, 255, 255, 0.72);
+      color: var(--white);
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(10, 56, 122, 0.45);
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .float-pill:nth-child(1) { transform: rotate(-4deg); }
+    .float-pill:nth-child(2) { transform: rotate(2.5deg); }
+    .float-pill:nth-child(3) { transform: rotate(-2deg); }
+    .float-pill:nth-child(4) { transform: rotate(3.5deg); }
+    .float-pill:nth-child(5) { transform: rotate(-2.5deg); }
+    .float-pill:hover, .float-pill.active {
+      transform: rotate(0deg) scale(1.05);
+      background: var(--white);
+      color: var(--blue-bg);
+      border-color: var(--white);
+    }
+
+    /* Иллюстрация персонажа с белой стикерной обводкой и подписью */
+    .hero-character-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .handwritten-note {
+      font-family: "Caveat", cursive;
+      font-size: 26px;
+      color: var(--white);
+      transform: rotate(-12deg);
+      margin-bottom: 34px;
+      line-height: 1;
+      text-align: center;
+    }
+    .sticker-mascot {
+      width: 155px;
+      height: 135px;
+      filter: drop-shadow(0 8px 18px rgba(7, 32, 74, 0.35));
+    }
+
+    /* ПАНЕЛЬ ФИЛЬТРОВ КЛАССОВ И ПОИСКА */
+    .catalog-bar {
+      background: rgba(10, 56, 122, 0.65);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      border-radius: 24px;
+      padding: 16px 18px;
+      margin-bottom: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .grade-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
     .chip {
-      padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border);
-      background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--muted);
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      background: transparent;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .chip:hover {
+      border-color: var(--white);
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .chip.active {
+      background: var(--white);
+      color: var(--blue-bg);
+      border-color: var(--white);
+    }
     .search-input {
-      flex: 1; min-width: 210px; padding: 9px 14px; border-radius: 999px;
-      border: 1px solid var(--border); font-size: 14px; background: #fff;
+      flex: 1;
+      min-width: 220px;
+      max-width: 340px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--white);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .search-input::placeholder { color: rgba(255, 255, 255, 0.72); }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--white);
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(295px, 1fr)); gap: 16px; }
+    /* КАРТОЧКИ ТЕМ В СТИЛЕ БЕЛЫХ СТИКЕРОВ */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(305px, 1fr));
+      gap: 18px;
+    }
     .topic-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
-      padding: 18px; display: flex; flex-direction: column; justify-content: space-between;
-      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03); transition: transform 0.12s, box-shadow 0.12s;
+      background: var(--card-bg);
+      color: var(--ink);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 3px solid var(--white);
+      box-shadow: 0 10px 26px rgba(7, 32, 74, 0.28);
+      transition: transform 0.15s, box-shadow 0.15s;
     }
-    .topic-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07); }
-    .tags { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .topic-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 34px rgba(7, 32, 74, 0.38);
+    }
+    .tags {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
     .tag {
-      font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 8px;
-      background: var(--primary-light); color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e0ecff;
+      color: var(--blue-bg);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
-    .tag-game { background: #fef3c7; color: #92400e; }
-    .tag-fresh { background: #dcfce7; color: #166534; }
-    .topic-card h3 { margin: 0 0 8px; font-size: 16px; line-height: 1.35; }
-    .topic-card p { margin: 0 0 16px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+    .tag-game {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .tag-fresh {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .topic-card h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .topic-card p {
+      margin: 0 0 18px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-weight: 500;
+    }
 
     .btn {
-      padding: 10px 15px; border: none; border-radius: 12px; font-weight: 600;
-      font-size: 14px; cursor: pointer; background: var(--primary); color: #fff;
-      transition: opacity 0.15s;
+      padding: 11px 16px;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--blue-bg);
+      color: var(--white);
+      transition: transform 0.1s, background 0.15s;
     }
-    .btn:hover { opacity: 0.92; }
+    .btn:hover { background: var(--blue-light); }
+    .btn:active { transform: scale(0.98); }
     .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-    .btn-outline { background: #e2e8f0; color: var(--text); }
-    .btn-refresh { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-    .btn-success { background: var(--success); }
+    .btn-white {
+      background: var(--white);
+      color: var(--blue-bg);
+    }
+    .btn-white:hover { background: #f1f5f9; }
+    .btn-outline {
+      background: #e2e8f0;
+      color: var(--ink);
+    }
+    .btn-refresh {
+      background: #fef2f2;
+      color: var(--red-accent);
+      border: 1.5px solid #fecaca;
+    }
+    .btn-refresh:hover { background: #fee2e2; }
+    .btn-success {
+      background: var(--green-accent);
+      color: var(--white);
+    }
 
+    /* ИГРОВАЯ АРЕНА (БЕЛЫЙ СТИКЕР-КОНТЕЙНЕР НА СИНЕМ ФОНЕ) */
     .arena {
-      background: #fff; border: 1px solid var(--border); border-radius: 22px;
-      padding: 24px; box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      background: var(--white);
+      color: var(--ink);
+      border-radius: 28px;
+      padding: 26px;
+      border: 4px solid var(--white);
+      box-shadow: 0 14px 40px rgba(7, 32, 74, 0.35);
     }
     .arena-top {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .stats-pill {
-      background: #f8fafc; border: 1px solid var(--border); padding: 6px 14px;
-      border-radius: 12px; font-weight: 700; font-size: 14px;
+      background: var(--blue-bg);
+      color: var(--white);
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 13px;
     }
 
     /* Игра 1: Сортировщик */
     .word-stage {
-      background: linear-gradient(135deg, #eff6ff, #f8fafc);
-      border: 2px dashed #93c5fd; border-radius: 18px;
-      padding: 26px 16px; text-align: center; margin-bottom: 18px;
+      background: #eff6ff;
+      border: 2px dashed #60a5fa;
+      border-radius: 20px;
+      padding: 28px 16px;
+      text-align: center;
+      margin-bottom: 18px;
     }
-    .current-word { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.45; }
-    .buckets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    .current-word {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .buckets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
     .bucket-btn {
-      padding: 15px 12px; border-radius: 14px; border: 2px solid var(--border);
-      background: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
-      transition: all 0.15s; color: var(--text);
+      padding: 15px 14px;
+      border-radius: 16px;
+      border: 2px solid #cbd5e1;
+      background: var(--white);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--ink);
     }
-    .bucket-btn:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
+    .bucket-btn:hover {
+      border-color: var(--blue-bg);
+      background: #eff6ff;
+      transform: translateY(-2px);
+    }
 
     /* Игра 2: Корректор */
     .text-board {
-      font-size: 19px; line-height: 1.95; background: #f8fafc;
-      padding: 20px; border-radius: 16px; border: 1px solid var(--border);
+      font-size: 19px;
+      line-height: 2;
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 18px;
+      border: 1.5px solid #e2e8f0;
     }
     .token {
-      display: inline-block; padding: 2px 6px; margin: 2px 1px; border-radius: 8px;
-      cursor: pointer; transition: background 0.15s;
+      display: inline-block;
+      padding: 2px 7px;
+      margin: 2px 1px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
     }
     .token:hover { background: #e2e8f0; }
-    .token.found { background: #dcfce7; color: #166534; font-weight: 700; text-decoration: underline; }
+    .token.found { background: #dcfce7; color: #166534; font-weight: 800; text-decoration: underline; }
     .token.wrong-click { background: #fee2e2; color: #991b1b; }
 
-    /* Игра 3 и 4: Морфемный и Синтаксический конструктор */
+    /* Игра 3 и 4: Конструкторы */
     .role-palette { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     .role-btn {
-      padding: 9px 14px; border-radius: 10px; border: 2px solid var(--border);
-      background: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+      padding: 9px 15px;
+      border-radius: 999px;
+      border: 2px solid #cbd5e1;
+      background: var(--white);
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
     }
-    .role-btn.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .role-btn.selected {
+      border-color: var(--blue-bg);
+      background: var(--blue-bg);
+      color: var(--white);
+    }
     .morpheme-word {
-      display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;
-      background: #f8fafc; padding: 24px 16px; border-radius: 18px;
-      border: 1px solid var(--border); margin-bottom: 16px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #f8fafc;
+      padding: 24px 16px;
+      border-radius: 18px;
+      border: 1.5px solid #e2e8f0;
+      margin-bottom: 16px;
     }
     .morph-part {
-      padding: 12px 14px; background: #fff; border: 2px solid var(--border);
-      border-radius: 14px; cursor: pointer; text-align: center; min-width: 78px;
+      padding: 12px 14px;
+      background: var(--white);
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      cursor: pointer;
+      text-align: center;
+      min-width: 80px;
       transition: border-color 0.15s;
     }
-    .morph-part:hover { border-color: var(--primary); }
+    .morph-part:hover { border-color: var(--blue-bg); }
     .morph-part .m-text { font-size: 20px; font-weight: 800; display: block; }
-    .morph-part .m-role { font-size: 12px; color: var(--primary); font-weight: 700; margin-top: 6px; display: block; }
+    .morph-part .m-role { font-size: 12px; color: var(--blue-bg); font-weight: 700; margin-top: 6px; display: block; }
 
-    /* Игра 5: Пунктуационный разбор */
+    /* Игра 5: Пунктуация */
     .punct-sentence {
-      font-size: 20px; line-height: 2.2; background: #f8fafc;
-      padding: 22px 18px; border-radius: 18px; border: 1px solid var(--border);
+      font-size: 20px;
+      line-height: 2.2;
+      background: #f8fafc;
+      padding: 22px 18px;
+      border-radius: 18px;
+      border: 1.5px solid #e2e8f0;
       margin-bottom: 16px;
     }
     .punct-word {
-      display: inline-block; padding: 4px 10px; margin: 3px 2px; border-radius: 10px;
-      background: #fff; border: 2px solid var(--border); cursor: pointer;
-      font-weight: 600; transition: all 0.15s; user-select: none;
+      display: inline-block;
+      padding: 4px 10px;
+      margin: 3px 2px;
+      border-radius: 10px;
+      background: var(--white);
+      border: 2px solid #cbd5e1;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+      user-select: none;
     }
-    .punct-word:hover { border-color: var(--primary); }
+    .punct-word:hover { border-color: var(--blue-bg); }
     .punct-word.has-comma {
-      border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 800;
+      border-color: var(--blue-bg);
+      background: #eff6ff;
+      color: var(--blue-bg);
+      font-weight: 800;
     }
-    .punct-word.comma-ok {
-      border-color: var(--success); background: #dcfce7; color: #166534;
-    }
-    .punct-word.comma-err {
-      border-color: var(--danger); background: #fee2e2; color: #991b1b;
-    }
+    .punct-word.comma-ok { border-color: var(--green-accent); background: #dcfce7; color: #166534; }
+    .punct-word.comma-err { border-color: var(--red-accent); background: #fee2e2; color: #991b1b; }
 
     .feedback-box {
-      margin-top: 16px; padding: 14px 16px; border-radius: 14px;
-      font-size: 14px; font-weight: 600; display: none; line-height: 1.45;
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+      line-height: 1.45;
     }
     .fb-ok { background: #dcfce7; color: #166534; display: block; }
     .fb-err { background: #fee2e2; color: #991b1b; display: block; }
@@ -169,22 +529,90 @@
 <body>
   <header>
     <div class="header-inner">
-      <div class="logo" onclick="showCatalog()">📚 Русский язык — Игротека</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-outline" onclick="showCatalog()">Все темы</button>
-        <button class="btn btn-outline" onclick="openApiKeyModal()">🔑 Ключ ИИ</button>
-        <button class="btn" onclick="openTeacherModal()">+ Новая тема</button>
+      <div class="pill-badge" onclick="showCatalog()">📚 русский язык • 6–9 классы</div>
+      <div class="nav-actions">
+        <button class="pill-badge" onclick="showCatalog()">Все игры</button>
+        <button class="pill-badge" onclick="openApiKeyModal()">🔑 Ключ ИИ</button>
+        <button class="btn btn-white" onclick="openTeacherModal()">+ Новая тема</button>
       </div>
     </div>
   </header>
 
   <div class="container">
-    <!-- КАТАЛОГ ТЕМ -->
+    <!-- КАТАЛОГ ТЕМ + ПОСТЕРНЫЙ HERO -->
     <div id="catalogView">
-      <div class="filters">
-        <div id="gradeFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-        <input id="searchBox" class="search-input" type="text" placeholder="Поиск по теме, корню или правилу..." oninput="renderCatalog()" />
+      <section class="hero-poster">
+        <div class="hero-title-wrap">
+          <h1 class="hero-main-title">РУССКИЙ ЯЗЫК</h1>
+          <!-- Красный экспрессивный росчерк поверх заголовка -->
+          <svg class="hero-scribble" viewBox="0 0 600 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 54 C 45 12, 72 62, 96 18 C 118 58, 148 10, 174 52 C 198 14, 224 60, 252 16 C 276 58, 304 12, 330 54 C 356 14, 384 60, 412 18 C 438 56, 468 12, 496 52 C 522 18, 550 56, 582 22"
+                  stroke="#e63926" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+          </svg>
+        </div>
+        <div class="hero-subtitle">ИНТЕРАКТИВНЫЕ ИГРЫ И ТРЕНАЖЁРЫ</div>
+        <p class="hero-desc">
+          морфемика, словообразование, чередующиеся корни, типы сказуемых, ССП и СПП,
+          синтаксический и пунктуационный разбор с автообновлением заданий
+        </p>
+
+        <!-- Наклонные капсулы-теги как на референсе -->
+        <div class="floating-pills">
+          <span class="float-pill" onclick="quickFilterSection('Чередующиеся корни')">чередующиеся корни</span>
+          <span class="float-pill" onclick="quickFilterSection('Типы сказуемых')">ПГС, СГС и СИС</span>
+          <span class="float-pill" onclick="quickFilterSection('Морфемика')">морфемный разбор</span>
+          <span class="float-pill" onclick="quickFilterSection('Синтаксис СПП')">союзы и союзные слова</span>
+          <span class="float-pill" onclick="quickFilterSection('Пунктуационный разбор')">пунктуация СПП</span>
+        </div>
+
+        <!-- Персонаж-стикер с белой обводкой и рукописной подписью -->
+        <div class="hero-character-row">
+          <div class="handwritten-note">
+            Учимся<br>без зубрёжки!
+            <svg width="36" height="24" viewBox="0 0 40 28" fill="none" style="display:block;margin:2px auto 0;">
+              <path d="M6 4 C 12 20, 26 22, 34 12 M 28 10 L 35 11 L 32 18" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <svg class="sticker-mascot" viewBox="0 0 220 190" xmlns="http://www.w3.org/2000/svg">
+            <!-- Белая стикерная обводка -->
+            <g stroke="#ffffff" stroke-width="14" stroke-linejoin="round" stroke-linecap="round">
+              <path d="M55 170 C 48 115, 58 32, 110 32 C 162 32, 172 115, 165 170 Z" fill="#8b5a2b"/>
+              <rect x="132" y="112" width="72" height="54" rx="8" transform="rotate(-10 132 112)" fill="#1e293b"/>
+            </g>
+            <!-- Волосы -->
+            <path d="M55 170 C 48 115, 58 32, 110 32 C 162 32, 172 115, 165 170 Z" fill="#8b5a2b"/>
+            <!-- Свитер -->
+            <path d="M64 172 C 68 142, 85 134, 110 134 C 135 134, 152 142, 156 172 Z" fill="#1e293b"/>
+            <!-- Шея и лицо -->
+            <rect x="100" y="118" width="20" height="22" rx="8" fill="#f5c6a5"/>
+            <ellipse cx="110" cy="86" rx="36" ry="40" fill="#fde0c8"/>
+            <!-- Чёлка -->
+            <path d="M74 82 C 76 50, 102 42, 110 42 C 118 42, 144 50, 146 82 C 134 62, 118 58, 110 64 C 102 58, 86 62, 74 82 Z" fill="#8b5a2b"/>
+            <!-- Глаза, румянец и улыбка -->
+            <circle cx="96" cy="88" r="6.5" fill="#0f172a"/>
+            <circle cx="124" cy="88" r="6.5" fill="#0f172a"/>
+            <circle cx="94" cy="86" r="2" fill="#ffffff"/>
+            <circle cx="122" cy="86" r="2" fill="#ffffff"/>
+            <ellipse cx="86" cy="100" rx="6" ry="3.5" fill="#f87171" opacity="0.55"/>
+            <ellipse cx="134" cy="100" rx="6" ry="3.5" fill="#f87171" opacity="0.55"/>
+            <path d="M103 105 Q 110 112 117 105" stroke="#c2410c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Ноутбук -->
+            <g transform="rotate(-10 132 112)">
+              <rect x="132" y="112" width="70" height="48" rx="7" fill="#cbd5e1" stroke="#0f172a" stroke-width="2.5"/>
+              <rect x="137" y="117" width="60" height="38" rx="4" fill="#7f1d1d"/>
+              <polygon points="124,160 206,160 214,172 116,172" fill="#94a3b8" stroke="#0f172a" stroke-width="2.5"/>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- ФИЛЬТРЫ ПО КЛАССАМ И ПОИСК -->
+      <div class="catalog-bar">
+        <div class="grade-chips" id="gradeFilters"></div>
+        <input id="searchBox" class="search-input" type="text" placeholder="Поиск по теме или правилу..." oninput="renderCatalog()" />
       </div>
+
+      <!-- СЕТКА ИГР -->
       <div id="topicsGrid" class="grid"></div>
     </div>
 
@@ -194,13 +622,13 @@
         <div class="arena-top">
           <button class="btn btn-outline" onclick="showCatalog()">← К темам</button>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <button class="btn btn-refresh" id="refreshTopicBtn" onclick="refreshCurrentTopicWithAI()">🔄 Обновить задания (новые примеры)</button>
+            <button class="btn btn-refresh" id="refreshTopicBtn" onclick="refreshCurrentTopicWithAI()">🔄 Обновить задания</button>
             <div class="stats-pill" id="scorePill">Очки: 0</div>
           </div>
         </div>
-        <h2 id="gameTitle" style="margin:0 0 6px;font-size:20px;"></h2>
+        <h2 id="gameTitle" style="margin:0 0 6px;font-size:21px;font-weight:800;"></h2>
         <p id="gameDesc" style="color:var(--muted);margin:0 0 16px;font-size:14px;"></p>
-        <div id="aiRefreshStatus" style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:10px;"></div>
+        <div id="aiRefreshStatus" style="font-size:13px;font-weight:700;color:var(--blue-bg);margin-bottom:10px;"></div>
         <div id="gameStage"></div>
         <div id="feedbackBox" class="feedback-box"></div>
       </div>
@@ -209,26 +637,29 @@
     <!-- НАСТРОЙКА API-КЛЮЧА -->
     <div id="keyView" class="hidden">
       <div class="arena">
-        <h2 style="margin-top:0;">🔑 Подключение автообновления заданий (Gemini API)</h2>
+        <h2 style="margin-top:0;font-weight:800;">🔑 Подключение автообновления заданий (Gemini API)</h2>
         <p style="color:var(--muted);">Один раз сохраните ваш ключ Google AI Studio — после этого внутри <strong>любой</strong> игры кнопка <strong>«🔄 Обновить задания»</strong> будет за 4 секунды генерировать совершенно новый набор слов и предложений по этой теме.</p>
-        <input id="savedGemKey" type="password" placeholder="Gemini API Key (AIzaSy...)" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);margin-bottom:12px;" />
+        <input id="savedGemKey" type="password" placeholder="Gemini API Key (AIzaSy...)" style="width:100%;padding:12px 16px;border-radius:14px;border:2px solid #cbd5e1;margin-bottom:12px;font-family:inherit;" />
         <div style="display:flex;gap:10px;">
           <button class="btn" onclick="saveGemKey()">Сохранить ключ</button>
           <button class="btn btn-outline" onclick="showCatalog()">Назад</button>
         </div>
-        <div id="keySaveStatus" style="margin-top:10px;font-size:14px;font-weight:600;color:var(--success);"></div>
+        <div id="keySaveStatus" style="margin-top:10px;font-size:14px;font-weight:700;color:var(--green-accent);"></div>
       </div>
     </div>
 
-    <!-- ГЕНЕРАТОР НОВОЙ ТЕМЫ ДЛЯ УЧИТЕЛЯ -->
+    <!-- ГЕНЕРАТОР НОВОЙ ТЕМЫ -->
     <div id="teacherView" class="hidden">
       <div class="arena">
-        <h2 style="margin-top:0;">✨ Создать новую игру по своей теме</h2>
+        <h2 style="margin-top:0;font-weight:800;">✨ Создать новую игру по своей теме</h2>
         <p style="color:var(--muted);">Введите класс и тему урока — ИИ соберёт новую игру и сохранит её в памяти вашего браузера.</p>
-        <input id="tGrade" type="text" placeholder="Класс (например: 9 класс)" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);margin-bottom:10px;" />
-        <input id="tTitle" type="text" placeholder="Тема игры (например: Бессоюзные сложные предложения)" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);margin-bottom:10px;" />
-        <button class="btn" id="tGenBtn" onclick="generateNewTopic()">Сгенерировать и открыть игру</button>
-        <div id="tStatus" style="margin-top:10px;font-size:14px;font-weight:600;color:var(--primary);"></div>
+        <input id="tGrade" type="text" placeholder="Класс (например: 9 класс)" style="width:100%;padding:12px 16px;border-radius:14px;border:2px solid #cbd5e1;margin-bottom:10px;font-family:inherit;" />
+        <input id="tTitle" type="text" placeholder="Тема игры (например: Бессоюзные сложные предложения)" style="width:100%;padding:12px 16px;border-radius:14px;border:2px solid #cbd5e1;margin-bottom:12px;font-family:inherit;" />
+        <div style="display:flex;gap:10px;">
+          <button class="btn" id="tGenBtn" onclick="generateNewTopic()">Сгенерировать и открыть игру</button>
+          <button class="btn btn-outline" onclick="showCatalog()">Отмена</button>
+        </div>
+        <div id="tStatus" style="margin-top:10px;font-size:14px;font-weight:700;color:var(--blue-bg);"></div>
       </div>
     </div>
   </div>
@@ -294,6 +725,15 @@
       selectedGrade = g;
       renderGradeFilters();
       renderCatalog();
+    }
+
+    function quickFilterSection(term) {
+      selectedGrade = "Все";
+      renderGradeFilters();
+      const box = document.getElementById("searchBox");
+      box.value = term;
+      renderCatalog();
+      document.querySelector(".catalog-bar").scrollIntoView({ behavior: "smooth" });
     }
 
     function renderCatalog() {
@@ -417,7 +857,7 @@
         }
       };
 
-      let models = ["gemini-3.8-flash"];
+      let models = ["gemini-2.5-flash"];
       try {
         const listResp = await fetchT(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(gemKey)}`, {}, 6000);
         const listJson = await listResp.json();
@@ -821,7 +1261,7 @@ ${schemaInstruction}`;
         };
 
         window._toggleComma = (i) => {
-          if (i === sent.words.length - 1) return; // После последнего слова точка уже стоит
+          if (i === sent.words.length - 1) return;
           checkedState = null;
           if (chosenCommas.has(i)) chosenCommas.delete(i);
           else chosenCommas.add(i);
